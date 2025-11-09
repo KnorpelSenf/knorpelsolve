@@ -14,5 +14,6 @@
         "tamasfe.even-better-toml"
       ]
     }
-  }
+  },
+  "postCreateCommand": "deno i && deno task build"
 }
