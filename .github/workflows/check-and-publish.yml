@@ -1,9 +1,5 @@
 name: Check and Publish
 
-env:
-  # Unified cache key used across all jobs and both caching mechanisms (rust-cache + actions/cache)
-  RUST_UNIFIED_CACHE_KEY: v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-
 on:
   push:
     branches:
@@ -30,10 +26,10 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: target
-          key: ${{ env.RUST_UNIFIED_CACHE_KEY }}
+          key: v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: ${{ env.RUST_UNIFIED_CACHE_KEY }}
+          shared-key: v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
           cache-targets: "false"
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
@@ -54,10 +50,10 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: target
-          key: ${{ env.RUST_UNIFIED_CACHE_KEY }}
+          key: v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: ${{ env.RUST_UNIFIED_CACHE_KEY }}
+          shared-key: v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
           cache-targets: "false"
       - run: deno task build
       - run: deno publish
