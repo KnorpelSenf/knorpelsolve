@@ -16,7 +16,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache-hash: ${{ hashFiles('**/deno.json') }}
+          cache-hash: deno-${{ hashFiles('**/deno.json') }}
       - run: deno task ok
 
   rust-check:
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock') }}"
+          shared-key: "rust-check-${{ hashFiles('**/Cargo.lock') }}"
           cache-all-crates: true
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
@@ -42,10 +42,10 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache-hash: ${{ hashFiles('**/deno.json') }}
+          cache-hash: deno-${{ hashFiles('**/deno.json') }}
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock') }}"
+          shared-key: "rust-publish-${{ hashFiles('**/Cargo.lock') }}"
           cache-all-crates: true
       - run: deno task build
       - run: deno publish
