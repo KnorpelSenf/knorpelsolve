@@ -28,11 +28,11 @@ package directly to cache the binary and print its path.
 
 ```sh
 $ deno -Ar jsr:@knorpelsenf/knorpelsolve
-/home/vscode/.cache/libknorpelsolve/0.0.0/libknorpelsolve.so
+/home/vscode/.cache/libknorpelsolve/1.0.0/libknorpelsolve.so
 ```
 
 ```ts
 using lib = await loadCached(
-  "/home/vscode/.cache/libknorpelsolve/0.0.0/libknorpelsolve.so",
+  "/home/vscode/.cache/libknorpelsolve/1.0.0/libknorpelsolve.so",
 );
 ```
