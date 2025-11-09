@@ -1,6 +1,6 @@
 {
   "name": "@knorpelsenf/knorpelsolve",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "exports": "./mod.ts",
   "license": "MIT",
   "lock": false,
@@ -16,7 +16,7 @@
   },
   "tasks": {
     "ok": "deno fmt --check && deno lint && deno check *.ts",
-    "build": "cargo build --release"
+    "build": "cargo build --release --color=always"
   },
   "imports": {
     "@std/fs": "jsr:@std/fs@^1.0.19",
