@@ -124,9 +124,15 @@ export interface Problem {
     right: number | Variable | Expression,
   ): Constraint;
   /** solves the MILP by finding a minimum */
-  minimize(objective: Variable | Expression): Solution;
+  minimize(objective: Variable | Expression, options?: SolveOptions): Solution;
   /** solves the MILP by finding a maximum */
-  maximize(objective: Variable | Expression): Solution;
+  maximize(objective: Variable | Expression, options?: SolveOptions): Solution;
+}
+
+/** options for the solution process */
+export interface SolveOptions {
+  /** whether to log output while solving the problem */
+  verbose?: boolean;
 }
 
 function problem(ffi: Ffi): () => Problem {
@@ -149,11 +155,15 @@ function problem(ffi: Ffi): () => Problem {
         conss.push(cons);
         return cons;
       },
-      minimize(objective) {
-        return solve(ffi, "min", vars, exp(objective), conss);
+      minimize(objective, options) {
+        return solve(ffi, "min", vars, exp(objective), conss, {
+          verbose: options?.verbose ?? false,
+        });
       },
-      maximize(objective) {
-        return solve(ffi, "max", vars, exp(objective), conss);
+      maximize(objective, options) {
+        return solve(ffi, "max", vars, exp(objective), conss, {
+          verbose: options?.verbose ?? false,
+        });
       },
     };
   };
@@ -182,6 +192,8 @@ interface MessageProblem {
 
   equalities: CoeffVar[][];
   equalities_offsets: number[];
+
+  verbose: boolean;
 }
 interface MessageSolution {
   status: "optimal" | "unbounded" | "infeasible";
@@ -194,6 +206,7 @@ function solve(
   vars: Map<string, Variable>,
   obj: Expression,
   conss: Constraint[],
+  options: { verbose: boolean },
 ): Solution {
   const variables = vars.values()
     .map((v) => ({
@@ -237,6 +250,7 @@ function solve(
     constraint_offsets,
     equalities,
     equalities_offsets,
+    verbose: options.verbose,
   };
   const solution = io(ffi, msg);
   return {

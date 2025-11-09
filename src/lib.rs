@@ -58,6 +58,8 @@ pub struct MessageProblem {
 
     pub equalities: Vec<Vec<CoeffVar>>, // == 0 constraints
     pub equalities_offsets: Vec<f64>,
+
+    pub verbose: bool,
 }
 
 #[derive(Serialize, PartialEq, Eq)]
@@ -130,7 +132,7 @@ pub unsafe extern "C" fn solve(buffer: *const u8, len: usize) -> *const c_char {
         Direction::Max => problem.maximise(objective),
     }
     .using(highs);
-    problem.set_verbose(true);
+    problem.set_verbose(input.verbose);
     let solution =
         problem
             .with_all(
