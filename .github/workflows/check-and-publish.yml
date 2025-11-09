@@ -25,6 +25,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "ci-rust"
+      - uses: actions/cache@v4
+        with:
+          path: target
+          key: release-build-${{ hashFiles('**/Cargo.lock', 'src/**') }}
+          restore-keys: |
+            release-build-
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
 
@@ -43,5 +49,11 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "ci-rust"
+      - uses: actions/cache@v4
+        with:
+          path: target
+          key: release-build-${{ hashFiles('**/Cargo.lock', 'src/**') }}
+          restore-keys: |
+            release-build-
       - run: deno task build
       - run: deno publish
