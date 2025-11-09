@@ -296,7 +296,7 @@ export function loadCached(binaryPath: string): Library {
 }
 
 async function cache(options?: { cacheDir?: string }) {
-  const { default: manifest } = await import("./deno.jsonc", {
+  const { default: manifest } = await import("./deno.json", {
     with: { type: "json" },
   });
   if (!("name" in manifest) || typeof manifest.name !== "string") {
