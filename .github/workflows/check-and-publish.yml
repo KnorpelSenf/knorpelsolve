@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock', 'src/**') }}"
+          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock') }}"
           cache-all-crates: true
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
@@ -45,7 +45,7 @@ jobs:
           cache-hash: ${{ hashFiles('**/deno.json') }}
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock', 'src/**') }}"
+          shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock') }}"
           cache-all-crates: true
       - run: deno task build
       - run: deno publish
