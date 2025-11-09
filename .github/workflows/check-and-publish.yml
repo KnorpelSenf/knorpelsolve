@@ -1,4 +1,4 @@
-name: Check and Publish
+name: CI
 
 on:
   push:
@@ -17,9 +17,11 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+          cache: true
+      - uses: Swatinem/rust-cache@v2
       - run: deno task ok
       - run: cargo fmt --check
+      - run: cargo clippy -- -D warnings
       - run: deno task build
-      - run: cargo clippy --release -- -D warnings
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: deno publish
