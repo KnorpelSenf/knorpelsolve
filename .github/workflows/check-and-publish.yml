@@ -16,40 +16,14 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache: true
       - run: deno task ok
 
   rust-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Restore cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          key: target-v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
-
-      - name: Update cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
 
   publish:
     runs-on: ubuntu-latest
@@ -60,35 +34,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-
-      - name: Restore cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
-        with:
-          key: target-v1-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache: true
-
       - run: deno task build
       - run: deno publish
-
-      - name: Update cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
