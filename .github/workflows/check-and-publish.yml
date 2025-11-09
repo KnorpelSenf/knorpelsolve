@@ -1,4 +1,4 @@
-name: CI/CD
+name: Check and Publish
 
 on:
   push:
@@ -22,10 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
         with:
-          toolchain: stable
-          components: rustfmt, clippy
+          shared-key: "ci-rust"
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
 
@@ -41,5 +40,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "ci-rust"
       - run: deno task build
       - run: deno publish
