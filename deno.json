@@ -1,0 +1,33 @@
+{
+  "name": "@knorpelsenf/knorpelsolve",
+  "version": "0.0.0",
+  "exports": "./mod.ts",
+  "license": "MIT",
+  "lock": false,
+
+  "permissions": {
+    "default": {
+      "sys": true,
+      "read": true,
+      "write": true,
+      "net": ["jsr.io"],
+      "ffi": true
+    }
+  },
+  "tasks": {
+    "ok": "deno fmt --check && deno lint && deno check *.ts",
+    "build": "cargo build --release"
+  },
+  "imports": {
+    "@std/fs": "jsr:@std/fs@^1.0.19",
+    "@std/path": "jsr:@std/path@^1.1.2"
+  },
+  "publish": {
+    "include": [
+      "./README.md",
+      "./mod.ts",
+      "./target/release/libknorpelsolve.so"
+    ],
+    "exclude": ["!./target/release/libknorpelsolve.so"]
+  }
+}

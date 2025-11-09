@@ -1,13 +1,38 @@
 # knorpelsolve
 
-highly experimental MILP solver for typescript
+fast integer linear programming solver for typescript
+
+```sh
+deno add jsr:@knorpelsenf/knorpelsolve
+```
 
 ```ts
-const p = problem();
+import { add, div, load, mul, sub } from "@knorpelsenf/knorpelsolve";
+
+using lib = await load();
+
+const p = lib.problem();
 const a = p.variable("a", { max: 1 });
 const b = p.variable("b", { min: 2, max: 4 });
 p.constraint(add(a, 2), "<=", b);
 p.constraint(add(1, a), ">=", sub(4, b));
-const solution = p.minimize(sub(mul(10, sub(a, div(b, 5))), b));
+const solution = p.maximize(sub(mul(10, sub(a, div(b, 5))), b));
 console.log(solution.status, solution.values);
+```
+
+The library downloads and caches a binary which performs the solving at native
+speed. This happens automatically the first time you use it.
+
+You can perform the download upfront to make your program start faster. Run the
+package directly to cache the binary and print its path.
+
+```sh
+$ deno -Ar jsr:@knorpelsenf/knorpelsolve
+/home/vscode/.cache/libknorpelsolve/0.0.0/libknorpelsolve.so
+```
+
+```ts
+const lib = await loadCached(
+  "/home/vscode/.cache/libknorpelsolve/0.0.0/libknorpelsolve.so",
+);
 ```
