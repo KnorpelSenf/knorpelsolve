@@ -16,7 +16,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache: true
+          cache-hash: ${{ hashFiles('**/deno.json') }}
       - run: deno task ok
 
   rust-check:
@@ -42,7 +42,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-          cache: true
+          cache-hash: ${{ hashFiles('**/deno.json') }}
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: "ci-rust-${{ hashFiles('**/Cargo.lock', 'src/**') }}"
