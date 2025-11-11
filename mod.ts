@@ -50,7 +50,7 @@ export function exp(
   ...vars: Array<number | Variable | Expression>
 ): Expression {
   if (typeof constant === "number") {
-    return { linear: { coeff: new Map() }, constant: constant };
+    return { linear: { coeff: new Map() }, constant };
   }
   if ("name" in constant) {
     const coeff = new Map([[constant.name, { factor: 1, variable: constant }]]);
