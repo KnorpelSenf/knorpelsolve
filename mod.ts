@@ -157,7 +157,9 @@ function parse(
           default: {
             const num = parseFloat(value);
             if (!Number.isNaN(num)) {
-              if (needsOp) yield { kind: "op", value: "+" };
+              if (needsOp && (value.startsWith("-") || value.startsWith("+"))) {
+                yield { kind: "op", value: "+" };
+              }
               yield { kind: "lit", value: num };
               needsOp = true;
               break;
