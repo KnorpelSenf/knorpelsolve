@@ -26,12 +26,12 @@
     "include": [
       "./README.md",
       "./mod.ts",
-      "./target/release/aarch64-unknown-linux-gnu/libknorpelsolve.so",
-      "./target/release/x86_64-unknown-linux-gnu/libknorpelsolve.so"
+      "./target/aarch64-unknown-linux-gnu/release/libknorpelsolve.so",
+      "./target/x86_64-unknown-linux-gnu/release/libknorpelsolve.so"
     ],
     "exclude": [
-      "!./target/release/aarch64-unknown-linux-gnu/libknorpelsolve.so",
-      "!./target/release/x86_64-unknown-linux-gnu/libknorpelsolve.so"
+      "!./target/aarch64-unknown-linux-gnu/release/libknorpelsolve.so",
+      "!./target/x86_64-unknown-linux-gnu/release/libknorpelsolve.so"
     ]
   }
 }
