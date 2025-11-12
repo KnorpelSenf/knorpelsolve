@@ -128,15 +128,13 @@ function parse(
     | { kind: "brac"; value: "(" | ")" }
     | { kind: "lit"; value: number }
     | { kind: "exp"; value: Expression };
-  function* tokenize(): Generator<Tok> {
-    yield { kind: "brac", value: "(" };
+  function* scan(): Generator<Tok> {
     let needsOp = false;
     for (let i = 0; i < strings.length; i++) {
       const piece = strings[i];
-      const tokenizer =
-        /\s*((?:[+-]?\d+(?:\.\d+)?)|[+\-*/()]|(?:[\s\S]+$))\s*/y;
+      const scanner = /\s*((?:[+-]?\d+(?:\.\d+)?)|[+\-*/()]|(?:[\s\S]+$))\s*/y;
       let token: RegExpExecArray | null;
-      while ((token = tokenizer.exec(piece)) != null) {
+      while ((token = scanner.exec(piece)) != null) {
         const value = token[1];
         switch (value) {
           case "+":
@@ -189,7 +187,6 @@ function parse(
           : { kind: "exp", value: exp(value) };
       }
     }
-    yield { kind: "brac", value: ")" };
   }
 
   type AstNode =
