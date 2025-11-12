@@ -59,7 +59,7 @@ export function exp(
   if ("linear" in constant) {
     return constant;
   }
-  return parse(constant, vars);
+  return parse(constant, vars, { type: "expression" });
 }
 /** a + b */
 export function add(
@@ -120,19 +120,33 @@ export function addMul(
 function parse(
   strings: TemplateStringsArray,
   vars: Array<number | Variable | Expression>,
-): Expression {
+  options: { type: "expression" },
+): Expression;
+function parse(
+  strings: TemplateStringsArray,
+  vars: Array<number | Variable | Expression>,
+  options: { type: "constraint" },
+): [Expression, "<=" | "==" | ">=", Expression];
+function parse(
+  strings: TemplateStringsArray,
+  vars: Array<number | Variable | Expression>,
+  options: { type: "expression" | "constraint" },
+): Expression | [Expression, "<=" | "==" | ">=", Expression] {
   if (vars.length + 1 !== strings.length) throw new Error("bad parse");
 
+  // === SCANNING ===
   type Tok =
     | { kind: "op"; value: "+" | "-" | "*" | "/" }
     | { kind: "brac"; value: "(" | ")" }
     | { kind: "lit"; value: number }
-    | { kind: "exp"; value: Expression };
+    | { kind: "exp"; value: Expression }
+    | { kind: "cmp"; value: "<=" | "==" | ">=" };
   function* scan(): Generator<Tok> {
     let needsOp = false;
     for (let i = 0; i < strings.length; i++) {
       const piece = strings[i];
-      const scanner = /\s*((?:[+-]?\d+(?:\.\d+)?)|[+\-*/()]|(?:[\s\S]+$))\s*/y;
+      const scanner =
+        /\s*((?:[+-]?\d+(?:\.\d+)?)|[+\-*/()]|(?:<=|==|>=)|(?:[\s\S]+$))\s*/y;
       let token: RegExpExecArray | null;
       while ((token = scanner.exec(piece)) != null) {
         const value = token[1];
@@ -151,6 +165,12 @@ function parse(
           case ")":
             needsOp = true;
             yield { kind: "brac", value };
+            break;
+          case "<=":
+          case "==":
+          case ">=":
+            needsOp = false;
+            yield { kind: "cmp", value };
             break;
           default: {
             const num = parseFloat(value);
@@ -189,82 +209,90 @@ function parse(
     }
   }
 
+  // === PARSING ===
   type AstNode =
     | { kind: "lit"; value: number }
     | { kind: "exp"; value: Variable | Expression }
-    | { kind: "bin"; op: "+" | "-" | "*" | "/"; left: AstNode; right: AstNode };
-  function generateAst(): AstNode {
-    const tokens = scan();
-    let head = tokens.next().value;
-    function peek(): Tok | undefined {
-      return head;
-    }
-    function next(): Tok {
-      const token = head;
-      head = tokens.next().value;
-      return token;
-    }
-
-    function primary(): AstNode {
-      const token = next();
-      if (!token) throw new Error("Unexpected end of expression");
-
-      if (token.kind === "lit" || token.kind === "exp") {
-        return token;
-      }
-      if (token.kind === "brac" && token.value === "(") {
-        const node = expression();
-        const closing = next();
-        if (!closing || closing.kind !== "brac" || closing.value !== ")") {
-          throw new Error("Expected ')'");
-        }
-        return node;
-      }
-      throw new Error(`Unexpected token: ${Deno.inspect(token)}`);
-    }
-    function product(): AstNode {
-      let node = primary();
-      while (
-        peek()?.kind === "op" &&
-        (peek()?.value === "*" || peek()?.value === "/")
-      ) {
-        const opToken = next() as { kind: "op"; value: "*" | "/" };
-        const right = primary();
-        node = { kind: "bin", op: opToken.value, left: node, right };
-      }
-      return node;
-    }
-    function sum(): AstNode {
-      let node = product();
-      while (
-        peek()?.kind === "op" &&
-        (peek()?.value === "+" || peek()?.value === "-")
-      ) {
-        const opToken = next() as { kind: "op"; value: "+" | "-" };
-        const right = product();
-        node = { kind: "bin", op: opToken.value, left: node, right: right };
-      }
-      return node;
-    }
-    function expression(): AstNode {
-      return sum();
-    }
-
-    const ast = expression();
-    if (peek() !== undefined) {
-      throw new Error(
-        `Unexpected token at end of expression: ${Deno.inspect(peek())}`,
-      );
-    }
-    return ast;
+    | { kind: "bin"; op: "+" | "-" | "*" | "/"; left: AstNode; right: AstNode }
+    | { kind: "cmp"; op: "<=" | "==" | ">=" };
+  const tokens = scan();
+  let head = tokens.next().value;
+  function peek(): Tok | undefined {
+    return head;
+  }
+  function next(): Tok {
+    const token = head;
+    head = tokens.next().value;
+    return token;
   }
 
+  function primary(): AstNode {
+    const token = next();
+    if (!token) throw new Error("Unexpected end of expression");
+
+    if (token.kind === "lit" || token.kind === "exp") {
+      return token;
+    }
+    if (token.kind === "brac" && token.value === "(") {
+      const node = expression();
+      const closing = next();
+      if (!closing || closing.kind !== "brac" || closing.value !== ")") {
+        throw new Error("Expected ')'");
+      }
+      return node;
+    }
+    throw new Error(`Unexpected token: ${Deno.inspect(token)}`);
+  }
+  function product(): AstNode {
+    let node = primary();
+    while (
+      peek()?.kind === "op" &&
+      (peek()?.value === "*" || peek()?.value === "/")
+    ) {
+      const opToken = next() as { kind: "op"; value: "*" | "/" };
+      const right = primary();
+      node = { kind: "bin", op: opToken.value, left: node, right };
+    }
+    return node;
+  }
+  function sum(): AstNode {
+    let node = product();
+    while (
+      peek()?.kind === "op" &&
+      (peek()?.value === "+" || peek()?.value === "-")
+    ) {
+      const opToken = next() as { kind: "op"; value: "+" | "-" };
+      const right = product();
+      node = { kind: "bin", op: opToken.value, left: node, right: right };
+    }
+    return node;
+  }
+  function expression(): AstNode {
+    return sum();
+  }
+  function constraint(): [AstNode, "<=" | "==" | ">=", AstNode] {
+    const left = expression();
+    const cmp = next();
+    if (cmp.kind !== "cmp") {
+      throw new Error(
+        `Expected one of '<=', '==', '>=' but got unexpected token: ${
+          Deno.inspect(left)
+        }`,
+      );
+    }
+    const right = expression();
+    return [left, cmp.value, right];
+  }
+
+  // === EVALUATING ===
   function evaluate(ast: AstNode): number | Expression {
     switch (ast.kind) {
       case "lit":
         return ast.value;
       case "exp":
         return exp(ast.value);
+      case "cmp":
+        throw new Error("Cannot evaluate constraint");
       case "bin": {
         const left = evaluate(ast.left);
         const right = evaluate(ast.right);
@@ -302,8 +330,24 @@ function parse(
     }
   }
 
-  const ast = generateAst();
-  return exp(evaluate(ast));
+  // === EXECUTING ===
+  if (options.type === "expression") {
+    const e = expression();
+    if (peek() !== undefined) {
+      throw new Error(
+        `Unexpected token at end of expression: ${Deno.inspect(peek())}`,
+      );
+    }
+    return exp(evaluate(e));
+  } else {
+    const [l, cmp, r] = constraint();
+    if (peek() !== undefined) {
+      throw new Error(
+        `Unexpected token at end of constraint: ${Deno.inspect(peek())}`,
+      );
+    }
+    return [exp(evaluate(l)), cmp, exp(evaluate(r))];
+  }
 }
 
 /** MILP solution as map from variable name to value */
@@ -323,6 +367,11 @@ export interface Problem {
     left: number | Variable | Expression,
     operator: "<=" | "==" | ">=",
     right: number | Variable | Expression,
+  ): Constraint;
+  /** adds a constraint based on a string expression and returns it */
+  constraint(
+    constraint: TemplateStringsArray,
+    ...vars: Array<number | Variable | Expression>
   ): Constraint;
   /** solves the MILP by finding a minimum */
   minimize(objective: Variable | Expression, options?: SolveOptions): Solution;
@@ -347,11 +396,23 @@ function problem(ffi: Ffi): () => Problem {
         vars.set(name, v);
         return v;
       },
-      constraint(left, operator, right) {
-        const expression = operator === ">="
-          ? sub(right, left)
-          : sub(left, right);
-        const isEquality = operator === "==";
+      constraint(constraint, ...vars) {
+        let left: number | Variable | Expression;
+        let cmp: "<=" | "==" | ">=";
+        let right: number | Variable | Expression;
+        if (typeof vars[0] === "string" && vars.length === 2) {
+          left = constraint as Expression;
+          cmp = vars[0];
+          right = vars[1];
+        } else {
+          [left, cmp, right] = parse(
+            constraint as TemplateStringsArray,
+            vars as Variable[],
+            { type: "constraint" },
+          );
+        }
+        const expression = cmp === ">=" ? sub(right, left) : sub(left, right);
+        const isEquality = cmp === "==";
         const cons = { expression, isEquality };
         conss.push(cons);
         return cons;
