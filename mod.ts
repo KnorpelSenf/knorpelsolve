@@ -1,5 +1,6 @@
 import { join } from "@std/path/join";
 import { exists } from "@std/fs/exists";
+import { arch, homedir } from "node:os";
 
 /** options for creating a {@link Variable} */
 export interface VariableOptions {
@@ -724,28 +725,6 @@ export function loadCached(binaryPath: string): Library {
   };
 }
 
-async function defaultPath(version: string) {
-  const { homedir, arch } = await import("node:os");
-  const node = arch();
-  let rust: string;
-  switch (node) {
-    case "x64":
-      rust = "x86_64-unknown-linux-gnu";
-      break;
-    case "arm64":
-      rust = "aarch64-unknown-linux-gnu";
-      break;
-    default:
-      throw new Error(`unsupported architecture '${node}'`);
-  }
-  return join(
-    homedir(),
-    ".cache",
-    "libknorpelsolve",
-    version,
-    rust,
-  );
-}
 async function cache(options?: { cacheDir?: string }) {
   const { default: manifest } = await import("./deno.json", {
     with: { type: "json" },
@@ -756,12 +735,25 @@ async function cache(options?: { cacheDir?: string }) {
   if (!("version" in manifest) || typeof manifest.version !== "string") {
     throw new Error("Could not determine version");
   }
+  const cpu = arch();
+  let target: string;
+  switch (cpu) {
+    case "x64":
+      target = "x86_64-unknown-linux-gnu";
+      break;
+    case "arm64":
+      target = "aarch64-unknown-linux-gnu";
+      break;
+    default:
+      throw new Error(`unsupported architecture '${cpu}'`);
+  }
   const name = manifest.name;
   const version = manifest.version;
   const source =
-    `https://jsr.io/${name}/${version}/target/release/libknorpelsolve.so`;
+    `https://jsr.io/${name}/${version}/target/${target}/release/libknorpelsolve.so`;
 
-  const cacheDir = options?.cacheDir ?? await defaultPath(version);
+  const cacheDir = options?.cacheDir ??
+    join(homedir(), ".cache", "libknorpelsolve", version, target);
   await Deno.mkdir(cacheDir, { recursive: true });
   const dest = join(cacheDir, "libknorpelsolve.so");
 
