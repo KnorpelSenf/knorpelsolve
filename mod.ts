@@ -197,13 +197,15 @@ function parse(
     | { kind: "exp"; value: Variable | Expression }
     | { kind: "bin"; op: "+" | "-" | "*" | "/"; left: AstNode; right: AstNode };
   function generateAst(): AstNode {
-    const tokens = Array.from(tokenize());
-    let pos = 0;
+    const tokens = scan();
+    let head = tokens.next().value;
     function peek(): Tok | undefined {
-      return tokens[pos];
+      return head;
     }
     function next(): Tok {
-      return tokens[pos++];
+      const token = head;
+      head = tokens.next().value;
+      return token;
     }
 
     function primary(): AstNode {
@@ -252,7 +254,7 @@ function parse(
     }
 
     const ast = expression();
-    if (pos < tokens.length) {
+    if (peek() !== undefined) {
       throw new Error(
         `Unexpected token at end of expression: ${Deno.inspect(peek())}`,
       );
