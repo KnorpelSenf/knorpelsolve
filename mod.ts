@@ -704,6 +704,28 @@ export function loadCached(binaryPath: string): Library {
   };
 }
 
+async function defaultPath(version: string) {
+  const { homedir, arch } = await import("node:os");
+  const node = arch();
+  let rust: string;
+  switch (node) {
+    case "x64":
+      rust = "x86_64-unknown-linux-gnu";
+      break;
+    case "arm64":
+      rust = "aarch64-unknown-linux-gnu";
+      break;
+    default:
+      throw new Error(`unsupported architecture '${node}'`);
+  }
+  return join(
+    homedir(),
+    ".cache",
+    "libknorpelsolve",
+    version,
+    rust,
+  );
+}
 async function cache(options?: { cacheDir?: string }) {
   const { default: manifest } = await import("./deno.json", {
     with: { type: "json" },
@@ -719,12 +741,7 @@ async function cache(options?: { cacheDir?: string }) {
   const source =
     `https://jsr.io/${name}/${version}/target/release/libknorpelsolve.so`;
 
-  const cacheDir = options?.cacheDir ?? join(
-    (await import("node:os")).homedir(),
-    ".cache",
-    "libknorpelsolve",
-    version,
-  );
+  const cacheDir = options?.cacheDir ?? await defaultPath(version);
   await Deno.mkdir(cacheDir, { recursive: true });
   const dest = join(cacheDir, "libknorpelsolve.so");
 

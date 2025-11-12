@@ -40,3 +40,7 @@ using lib = loadCached(
   "/home/vscode/.cache/libknorpelsolve/1.0.0/libknorpelsolve.so",
 );
 ```
+
+Only Linux is supported, so you need to use a devcontainer if you are on Mac or
+WSL if you are on Windows. Both x86_64 and aarch64 targets are supported out of
+the box without any configuation.
