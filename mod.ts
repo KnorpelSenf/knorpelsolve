@@ -16,6 +16,10 @@ export interface VariableOptions {
 export interface Variable extends VariableOptions {
   /** name of the variable */
   name: string;
+  /** sets min = 0 and max = 1 and integer = true */
+  binary(): this;
+  /** sets integer = true */
+  int(): this;
 }
 /** a single (in)equality in the MILP */
 export interface Constraint {
@@ -397,7 +401,19 @@ function problem(ffi: Ffi): () => Problem {
     return {
       variable(name, options) {
         if (vars.has(name)) throw new Error(`variable '${name}' exists`);
-        const v = Object.freeze({ name, ...options });
+        const v: Variable = {
+          name,
+          ...options,
+          binary() {
+            v.min = 0;
+            v.max = 1;
+            return v.int();
+          },
+          int() {
+            v.integer = true;
+            return v;
+          },
+        };
         vars.set(name, v);
         return v;
       },
