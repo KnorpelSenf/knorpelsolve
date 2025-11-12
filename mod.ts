@@ -16,10 +16,12 @@ export interface VariableOptions {
 export interface Variable extends VariableOptions {
   /** name of the variable */
   name: string;
-  /** sets min = 0 and max = 1 and integer = true */
-  binary(): this;
+  /** sets min and max */
+  bounds(min: number, max: number): this;
   /** sets integer = true */
   int(): this;
+  /** sets min = 0 and max = 1 and integer = true */
+  binary(): this;
 }
 /** a single (in)equality in the MILP */
 export interface Constraint {
@@ -417,14 +419,17 @@ function problem(ffi: Ffi): () => Problem {
         const v: Variable = {
           name,
           ...options,
-          binary() {
-            v.min = 0;
-            v.max = 1;
-            return v.int();
+          bounds(min, max) {
+            v.min = min;
+            v.max = max;
+            return v;
           },
           int() {
             v.integer = true;
             return v;
+          },
+          binary() {
+            return v.bounds(0, 1).int();
           },
         };
         variables.set(name, v);
