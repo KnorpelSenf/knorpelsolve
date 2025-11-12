@@ -371,6 +371,7 @@ export interface Solution {
 export interface Problem {
   /** adds a variable and returns it */
   variable(name: string, options?: VariableOptions): Variable;
+
   /** adds a constraint and returns it */
   constraint(
     left: number | Variable | Expression,
@@ -382,10 +383,22 @@ export interface Problem {
     constraint: TemplateStringsArray,
     ...vars: Array<number | Variable | Expression>
   ): Constraint;
+
   /** solves the MILP by finding a minimum */
   minimize(objective: Variable | Expression, options?: SolveOptions): Solution;
+  /** solves the MILP by finding a minimum defined as a template string */
+  minimize(
+    objective: TemplateStringsArray,
+    ...vars: Array<number | Variable | Expression>
+  ): Solution;
+
   /** solves the MILP by finding a maximum */
   maximize(objective: Variable | Expression, options?: SolveOptions): Solution;
+  /** solves the MILP by finding a maximum defined as a template string */
+  maximize(
+    objective: TemplateStringsArray,
+    ...vars: Array<number | Variable | Expression>
+  ): Solution;
 }
 
 /** options for the solution process */
@@ -396,11 +409,11 @@ export interface SolveOptions {
 
 function problem(ffi: Ffi): () => Problem {
   return () => {
-    const vars: Map<string, Variable> = new Map();
-    const conss: Constraint[] = [];
+    const variables: Map<string, Variable> = new Map();
+    const constraints: Constraint[] = [];
     return {
       variable(name, options) {
-        if (vars.has(name)) throw new Error(`variable '${name}' exists`);
+        if (variables.has(name)) throw new Error(`variable '${name}' exists`);
         const v: Variable = {
           name,
           ...options,
@@ -414,7 +427,7 @@ function problem(ffi: Ffi): () => Problem {
             return v;
           },
         };
-        vars.set(name, v);
+        variables.set(name, v);
         return v;
       },
       constraint(constraint, ...vars) {
@@ -435,18 +448,28 @@ function problem(ffi: Ffi): () => Problem {
         const expression = cmp === ">=" ? sub(right, left) : sub(left, right);
         const isEquality = cmp === "==";
         const cons = { expression, isEquality };
-        conss.push(cons);
+        constraints.push(cons);
         return cons;
       },
-      minimize(objective, options) {
-        return solve(ffi, "min", vars, exp(objective), conss, {
-          verbose: options?.verbose ?? false,
-        });
+      minimize(objective, ...vars) {
+        if (!("name" in objective) && !("linear" in objective)) {
+          objective = exp(objective, ...vars as Variable[]);
+        }
+        const opts = {
+          verbose: typeof vars[0] === "object" && "verbose" in vars[0] &&
+            (vars[0].verbose ?? false),
+        };
+        return solve(ffi, "min", variables, exp(objective), constraints, opts);
       },
-      maximize(objective, options) {
-        return solve(ffi, "max", vars, exp(objective), conss, {
-          verbose: options?.verbose ?? false,
-        });
+      maximize(objective, ...vars) {
+        if (!("name" in objective) && !("linear" in objective)) {
+          objective = exp(objective, ...vars as Variable[]);
+        }
+        const opts = {
+          verbose: typeof vars[0] === "object" && "verbose" in vars[0] &&
+            (vars[0].verbose ?? false),
+        };
+        return solve(ffi, "max", variables, exp(objective), constraints, opts);
       },
     };
   };
