@@ -11,8 +11,6 @@ crate-type = ["cdylib"]
 name = "knorpelsolve"
 
 [dependencies]
-good_lp = { git = "https://github.com/rust-or/good_lp", rev = "8cf3cc34ae77ace03174f60c9990f061f11d8dfd", default-features = false, features = [
-    "highs",
-] }
+good_lp = { version = "1.14.2", default-features = false, features = ["highs"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"

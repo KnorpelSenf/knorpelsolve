@@ -108,8 +108,9 @@ checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
 name = "good_lp"
-version = "1.14.0"
-source = "git+https://github.com/rust-or/good_lp?rev=8cf3cc34ae77ace03174f60c9990f061f11d8dfd#8cf3cc34ae77ace03174f60c9990f061f11d8dfd"
+version = "1.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "776aa1ba88ac058e78408c17f4dbff826a51ae08ed6642f71ca0edd7fe9383f3"
 dependencies = [
  "fnv",
  "highs",
@@ -117,9 +118,9 @@ dependencies = [
 
 [[package]]
 name = "highs"
-version = "1.12.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "122a64dffa53f13578cffd62fdf1cb2f83ac8a71a989dce5d9232049331fff28"
+checksum = "c9f739d4b9d063219b2dfa00705d8f2127fcead4d053867a5557c953dc3a4b99"
 dependencies = [
  "highs-sys",
  "log",
@@ -127,9 +128,9 @@ dependencies = [
 
 [[package]]
 name = "highs-sys"
-version = "1.11.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "908a51a57402b0616cf0026c0e7bf908cbee7bac13bd45778ba4f2e2ac6bb6db"
+checksum = "9c51d1e4e682c01dd882d2d0cd89b6725cd5805dd307d290aac0a37be6fe0c58"
 dependencies = [
  "bindgen",
  "cmake",
@@ -323,9 +324,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "syn"
-version = "2.0.109"
+version = "2.0.110"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f17c7e013e88258aa9543dcbe81aca68a667a9ac37cd69c9fbc07858bfe0e2f"
+checksum = "a99801b5bd34ede4cf3fc688c5919368fea4e4814a4664359503e6015b280aea"
 dependencies = [
  "proc-macro2",
  "quote",
