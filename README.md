@@ -1,6 +1,6 @@
 # knorpelsolve
 
-fast integer linear programming solver for typescript
+fast mixed-integer linear programming (MILP) solver for typescript
 
 ```sh
 deno add jsr:@knorpelsenf/knorpelsolve
