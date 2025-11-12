@@ -391,7 +391,25 @@ export interface Solution {
   values: Map<string, number>;
 }
 
-/** MILP problem definition */
+/**
+ * MILP problem definition. Can be created after loading the library.
+ *
+ * ```ts
+ * import { load } from "@knorpelsenf/knorpelsolve";
+ *
+ * const lib = await load();
+ * // alternatively, load from a known path:
+ * // const lib = loadCached("/path/to/libknorpelsolve.so")
+ *
+ * // create a new MILP problem
+ * const problem: Problem = lib.problem();
+ *
+ * // define and solve problem
+ * const a = p.variable("a", { max: 1 });
+ * const solution = p.maximize(a);
+ * console.log(solution.values);
+ * ```
+ */
 export interface Problem {
   /**
    * Adds a variable and returns it.
@@ -408,6 +426,8 @@ export interface Problem {
    * const f = problem.variable("f").bounds(-5, 5);
    * // bounded, integer
    * const g = problem.variable("g").bounds(0, 1).int();
+   * // binary
+   * const h = problem.variable("h").binary();
    * ```
    */
   variable(name: string, options?: VariableOptions): Variable;
@@ -685,7 +705,7 @@ export interface Library {
 
   /** location of loaded binary on disk */
   binaryPath: string;
-  /** purges temporary files */
+  /** closes the loaded native library */
   [Symbol.dispose](): void;
 }
 /** loads the library */
