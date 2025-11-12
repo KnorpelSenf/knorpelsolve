@@ -1,6 +1,6 @@
 {
   "name": "@knorpelsenf/knorpelsolve",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "exports": "./mod.ts",
   "license": "MIT",
   "lock": false,
