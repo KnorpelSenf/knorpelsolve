@@ -104,7 +104,12 @@ export function addMul(
   expression = exp(expression);
   other = exp(other);
 
-  const res = structuredClone(expression);
+  // clone all factors, share all variables
+  const coeff = new Map(
+    expression.linear.coeff.entries()
+      .map(([name, { factor, variable }]) => [name, { factor, variable }]),
+  );
+  const res: Expression = { constant: expression.constant, linear: { coeff } };
   for (const { variable, factor } of other.linear.coeff.values()) {
     let existing = res.linear.coeff.get(variable.name);
     if (existing === undefined) {
