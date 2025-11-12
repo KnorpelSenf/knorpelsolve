@@ -32,7 +32,7 @@ $ deno -Ar jsr:@knorpelsenf/knorpelsolve
 ```
 
 ```ts
-using lib = await loadCached(
+using lib = loadCached(
   "/home/vscode/.cache/libknorpelsolve/1.0.0/libknorpelsolve.so",
 );
 ```
