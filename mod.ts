@@ -1,7 +1,7 @@
 import { join } from "@std/path/join";
 import { exists } from "@std/fs/exists";
 
-/** options for creating a variable */
+/** options for creating a {@link Variable} */
 export interface VariableOptions {
   /** optional min constraint */
   min?: number;
@@ -44,12 +44,34 @@ export interface LinearExpression {
   coeff: Map<string, { /** a */ factor: number; /** x */ variable: Variable }>;
 }
 
-/** constructs an expression from a template string */
+/**
+ * Constructs an {@link Expression} from a template string.
+ *
+ * ```ts
+ * const a = problem.variable("a");
+ * const b = problem.variable("b");
+ * const expression = exp`${a} + 3 - (${b} / (-5.5 / 2))`;
+ * const other = exp`7 * ${expression} - 2`;
+ * ```
+ */
 export function exp(
   expression: TemplateStringsArray,
   ...vars: Array<number | Variable | Expression>
 ): Expression;
-/** converts a number or an expression to an expression */
+/**
+ * Converts a number, a {@link Variable}, or an {@link Expression} to an
+ * {@link Expression}.
+ *
+ * ```ts
+ * const a = problem.variable("a");
+ *
+ * const expressions: Expression[] = [
+ *   exp(0),
+ *   exp(a),
+ *   exp(exp(exp(42))),
+ * ];
+ * ```
+ */
 export function exp(constant: number | Variable | Expression): Expression;
 export function exp(
   constant: number | Variable | Expression | TemplateStringsArray,
@@ -110,7 +132,7 @@ export function addMul(
   expression = exp(expression);
   other = exp(other);
 
-  // clone all factors, share all variables
+  // clone all factors, but share all variables
   const coeff = new Map(
     expression.linear.coeff.entries()
       .map(([name, { factor, variable }]) => [name, { factor, variable }]),
@@ -361,46 +383,108 @@ function parse(
   }
 }
 
-/** MILP solution as map from variable name to value */
+/** MILP solution as a map from each {@link Variable.name} to its value */
 export interface Solution {
   /** solution status */
   status: "optimal" | "unbounded" | "infeasible";
-  /** solution values */
+  /** solution values, may be empty if no solution was found */
   values: Map<string, number>;
 }
 
 /** MILP problem definition */
 export interface Problem {
-  /** adds a variable and returns it */
+  /**
+   * Adds a variable and returns it.
+   *
+   * ```ts
+   * // unbounded, continuous
+   * const a = problem.variable("a");
+   * // unbounded, integer
+   * const b = problem.variable("b", { integer: true });
+   * const c = problem.variable("c").int();
+   * // bounded, continuous
+   * const d = problem.variable("d", { min: 0 });
+   * const e = problem.variable("e", { max: 10 });
+   * const f = problem.variable("f").bounds(-5, 5);
+   * // bounded, integer
+   * const g = problem.variable("g").bounds(0, 1).int();
+   * ```
+   */
   variable(name: string, options?: VariableOptions): Variable;
 
-  /** adds a constraint and returns it */
+  /**
+   * Adds a constraint based on a string expression and returns it.
+   *
+   * ```ts
+   * const a = problem.variable("a");
+   * const b = problem.variable("b");
+   * problem.constraint`${a} + 4 >= (${b} - 1) / 2.0`;
+   * ```
+   */
+  constraint(
+    constraint: TemplateStringsArray,
+    ...vars: Array<number | Variable | Expression>
+  ): Constraint;
+  /**
+   * Adds a constraint and returns it.
+   *
+   * ```ts
+   * const a = problem.variable("a");
+   * const b = problem.variable("b");
+   * problem.constraint(add(a, 4), ">=", exp`(${b} - 1) / 2.0`);
+   * ```
+   */
   constraint(
     left: number | Variable | Expression,
     operator: "<=" | "==" | ">=",
     right: number | Variable | Expression,
   ): Constraint;
-  /** adds a constraint based on a string expression and returns it */
-  constraint(
-    constraint: TemplateStringsArray,
-    ...vars: Array<number | Variable | Expression>
-  ): Constraint;
 
-  /** solves the MILP by finding a minimum */
-  minimize(objective: Variable | Expression, options?: SolveOptions): Solution;
-  /** solves the MILP by finding a minimum defined as a template string */
+  /**
+   * Solves the MILP by finding a minimum defined as a template string.
+   *
+   * ```ts
+   * const a = problem.variable("a");
+   * const b = problem.variable("b");
+   * const solution = problem.minimize`10 * (${a} - ${b} / 5) - ${b}`;
+   * ```
+   */
   minimize(
     objective: TemplateStringsArray,
     ...vars: Array<number | Variable | Expression>
   ): Solution;
+  /**
+   * Solves the MILP by finding a minimum defined as a template string.
+   *
+   * ```ts
+   * const a = problem.variable("a").bounds(-5, 5);
+   * const solution = problem.minimize(a, { verbose: true });
+   * ```
+   */
+  minimize(objective: Variable | Expression, options?: SolveOptions): Solution;
 
-  /** solves the MILP by finding a maximum */
-  maximize(objective: Variable | Expression, options?: SolveOptions): Solution;
-  /** solves the MILP by finding a maximum defined as a template string */
+  /**
+   * Solves the MILP by finding a maximum defined as a template string.
+   *
+   * ```ts
+   * const a = problem.variable("a");
+   * const b = problem.variable("b");
+   * const solution = problem.maximize`10 * (${a} - ${b} / 5) - ${b}`;
+   * ```
+   */
   maximize(
     objective: TemplateStringsArray,
     ...vars: Array<number | Variable | Expression>
   ): Solution;
+  /**
+   * Solves the MILP by finding a maximum defined as a template string.
+   *
+   * ```ts
+   * const a = problem.variable("a").bounds(-5, 5);
+   * const solution = problem.maximize(a, { verbose: true });
+   * ```
+   */
+  maximize(objective: Variable | Expression, options?: SolveOptions): Solution;
 }
 
 /** options for the solution process */

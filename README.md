@@ -20,8 +20,12 @@ const solution = p.maximize`10 * (${a} - ${b} / 5) - ${b}`;
 console.log(solution.status, solution.values);
 ```
 
-The library downloads and caches a binary which performs the solving at native
-speed. This happens automatically the first time you use it.
+Check out the API reference on JSR for more information, especially the
+[`Problem` interface](https://jsr.io/@knorpelsenf/knorpelsolve/doc/~/Problem).
+
+The library downloads and caches a [HiGHS](https://highs.dev/) binary which
+performs the solving at native speed. This happens automatically the first time
+you use it.
 
 You can perform the download upfront to make your program start faster. Run the
 package directly to cache the binary and print its path.
