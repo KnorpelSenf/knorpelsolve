@@ -7,7 +7,7 @@ deno add jsr:@knorpelsenf/knorpelsolve
 ```
 
 ```ts
-import { add, div, load, mul, sub } from "@knorpelsenf/knorpelsolve";
+import { load } from "@knorpelsenf/knorpelsolve";
 
 using lib = await load();
 
