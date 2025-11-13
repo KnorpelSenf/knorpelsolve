@@ -698,6 +698,8 @@ function io(ffi: Ffi, msg: MessageProblem): MessageSolution {
 export interface LoadOptions {
   /** custom cache directory for binary files */
   cacheDir?: string;
+  /** target CPU architecture to use instead of detecting it */
+  arch?: "x64" | "arm64";
 }
 /** library which lets you create and solve MILPs */
 export interface Library {
@@ -720,12 +722,12 @@ export function loadCached(binaryPath: string): Library {
   return {
     problem: problem(lib.symbols),
 
-    binaryPath: binaryPath,
+    binaryPath,
     [Symbol.dispose]: () => lib.close(),
   };
 }
 
-async function cache(options?: { cacheDir?: string }) {
+async function cache(options?: LoadOptions) {
   const { default: manifest } = await import("./deno.json", {
     with: { type: "json" },
   });
@@ -735,7 +737,7 @@ async function cache(options?: { cacheDir?: string }) {
   if (!("version" in manifest) || typeof manifest.version !== "string") {
     throw new Error("Could not determine version");
   }
-  const cpu = arch();
+  const cpu = options?.arch ?? arch();
   let target: string;
   switch (cpu) {
     case "x64":
