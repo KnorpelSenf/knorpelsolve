@@ -40,7 +40,7 @@ const weightsAndVariables = [
 ] as const;
 const weightedSum = weightsAndVariables
   .map(([weight, variable]) => mul(weight, variable))
-  .reduce(sum);
+  .reduce(add);
 problem.maximize(weightedSum);
 ```
 
