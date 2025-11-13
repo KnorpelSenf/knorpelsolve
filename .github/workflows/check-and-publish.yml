@@ -27,3 +27,5 @@ jobs:
       - run: deno task build
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: deno publish
+      - if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+        run: deno publish --dry-run
