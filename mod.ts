@@ -475,7 +475,7 @@ export interface Problem {
     ...vars: Array<number | Variable | Expression>
   ): Solution;
   /**
-   * Solves the MILP by finding a minimum defined as a template string.
+   * Solves the MILP by finding a minimum of an expression.
    *
    * ```ts
    * const a = problem.variable("a").bounds(-5, 5);
@@ -498,7 +498,7 @@ export interface Problem {
     ...vars: Array<number | Variable | Expression>
   ): Solution;
   /**
-   * Solves the MILP by finding a maximum defined as a template string.
+   * Solves the MILP by finding a maximum of an expression.
    *
    * ```ts
    * const a = problem.variable("a").bounds(-5, 5);
