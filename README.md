@@ -64,4 +64,4 @@ using lib = loadCached(
 
 Only Linux is supported, so you need to use a devcontainer if you are on Mac or
 WSL if you are on Windows. Both x86_64 and aarch64 targets are supported out of
-the box without any configuation.
+the box without any configuration.
