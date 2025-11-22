@@ -703,7 +703,7 @@ export interface LoadOptions {
 }
 /** library which lets you create and solve MILPs */
 export interface Library {
-  /** creates a new MILP defintion */
+  /** creates a new MILP definition */
   problem(): Problem;
 
   /** location of loaded binary on disk */
