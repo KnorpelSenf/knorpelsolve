@@ -754,18 +754,16 @@ async function cache(options?: LoadOptions) {
 
   const cacheDir = options?.cacheDir ??
     join(homedir(), ".cache", "libknorpelsolve", version, target);
-  await Deno.mkdir(cacheDir, { recursive: true });
-  const dest = join(cacheDir, "libknorpelsolve.so");
-
-  await cacheFile(cacheDir, source, dest);
-
-  return dest;
+  const libPath = await cacheFile(cacheDir, source, "libknorpelsolve.so");
+  return libPath;
 }
-async function cacheFile(dir: string, source: URL, dest: string) {
+async function cacheFile(dir: string, source: URL, filename: string) {
+  const dest = join(dir, filename);
   if (await exists(dest, { isFile: true })) {
-    return;
+    return dest;
   }
 
+  await Deno.mkdir(dir, { recursive: true });
   const tempDest = await Deno.makeTempFile({ dir });
   {
     await using tempFile = await Deno.open(tempDest, { write: true });
@@ -774,6 +772,7 @@ async function cacheFile(dir: string, source: URL, dest: string) {
     await response.body.pipeTo(tempFile.writable);
   }
   await Deno.rename(tempDest, dest);
+  return dest;
 }
 
 if (import.meta.main) {
