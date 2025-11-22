@@ -98,7 +98,7 @@ impl MessageSolution {
 /// Receives a byte buffer of a JSON-encoded MILP problem instance, computes a
 /// solution, encodes it as JSON, and returns it as a C string.
 ///
-/// A null pointer is returend if there is an error. The error message is
+/// A null pointer is returned if there is an error. The error message is
 /// written to stderr.
 ///
 /// # Safety
@@ -177,7 +177,7 @@ pub unsafe extern "C" fn solve(buffer: *const u8, len: usize) -> *const c_char {
 /// Frees a string allocated by [`solve`].
 ///
 /// # Safety
-/// This may only be called for pointers returend from [`solve`], and it may
+/// This may only be called for pointers returned from [`solve`], and it may
 /// only be done once per pointer.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn free(s: *mut c_char) {
