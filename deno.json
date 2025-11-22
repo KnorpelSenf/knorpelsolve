@@ -10,7 +10,6 @@
       "sys": true,
       "read": true,
       "write": true,
-      "net": ["jsr.io"],
       "ffi": true
     }
   },
