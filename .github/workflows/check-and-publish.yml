@@ -14,10 +14,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: /var/cache/apt/archives/*.deb
-          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/check-and-publish.yml') }}
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
