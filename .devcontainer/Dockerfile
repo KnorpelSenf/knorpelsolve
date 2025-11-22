@@ -14,10 +14,15 @@ COPY --from=denoland/deno:bin-2.5.6 /deno /usr/local/bin/deno
 
 USER vscode
 
-RUN rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
-
-# set up shell completions for various tools
-RUN mkdir -p ~/.local/share/bash-completion/completions && \
+RUN \
+    # install arm compile targets
+    rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu && \
+    \
+    # install tool to upgrade deps
+    cargo install cargo-edit && \
+    \
+    # set up shell completions for various tools
+    mkdir -p ~/.local/share/bash-completion/completions && \
     rustup completions bash > ~/.local/share/bash-completion/completions/rustup && \
     rustup completions bash cargo > ~/.local/share/bash-completion/completions/cargo && \
     deno completions bash > ~/.local/share/bash-completion/completions/deno
