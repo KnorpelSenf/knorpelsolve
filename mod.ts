@@ -731,9 +731,6 @@ async function cache(options?: LoadOptions) {
   const { default: manifest } = await import("./deno.json", {
     with: { type: "json" },
   });
-  if (!("name" in manifest) || typeof manifest.name !== "string") {
-    throw new Error("Could not determine version");
-  }
   if (!("version" in manifest) || typeof manifest.version !== "string") {
     throw new Error("Could not determine version");
   }
@@ -749,10 +746,11 @@ async function cache(options?: LoadOptions) {
     default:
       throw new Error(`unsupported architecture '${cpu}'`);
   }
-  const name = manifest.name;
   const version = manifest.version;
-  const source =
-    `https://jsr.io/${name}/${version}/target/${target}/release/libknorpelsolve.so`;
+  const source = new URL(
+    `./target/${target}/release/libknorpelsolve.so`,
+    import.meta.url,
+  );
 
   const cacheDir = options?.cacheDir ??
     join(homedir(), ".cache", "libknorpelsolve", version, target);
@@ -763,7 +761,7 @@ async function cache(options?: LoadOptions) {
 
   return dest;
 }
-async function cacheFile(dir: string, source: string, dest: string) {
+async function cacheFile(dir: string, source: URL, dest: string) {
   if (await exists(dest, { isFile: true })) {
     return;
   }
